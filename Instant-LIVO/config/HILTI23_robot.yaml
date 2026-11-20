@@ -1,0 +1,99 @@
+common:
+  bag_enable: false # true: read bag directly; false: subscribe to ROS topics
+  bag_path: "" # bag file path used when bag_enable is true
+  img_topic: "/oak_cam_front/left/image_raw"
+  lid_topic: "/rslidar_points"
+  imu_topic: "/imu/data"
+  img_en: 1
+  lidar_en: 1
+  ros_driver_bug_fix: false
+
+extrin_calib:
+  # HILTI2023 robot: LiDAR -> IMU, rotation stored row-major.
+  extrinsic_T: [0.13372435098296154, -0.011301799498041736, 0.010893033077978013]
+  extrinsic_R: [0.9993809082422995, -0.003698810555961525, 0.03498741261178718,
+                -0.003397272928783347, -0.9999566093030181, -0.008673986849109801,
+                0.03501797791768812, 0.008549755065630918, -0.9993501102771111]
+
+  # LiDAR -> camera: inverse(T_imu_camera) * T_imu_lidar.
+  Rcl: [0.009216071055254418, 0.9999549264072197, 0.002282364615390928,
+        -0.8905066902756307, 0.009245582998742305, -0.4548761960900528,
+        -0.4548767949771094, 0.002159710384855826, 0.8905517598895681]
+  Pcl: [0.04107179865190702, -0.02055571576993493, -0.1048816261655327]
+
+time_offset:
+  imu_time_offset: 0.0
+  lidar_time_offset: -0.1
+  img_time_offset: 0.0
+  exposure_time_init: 0.0
+
+preprocess:
+  hilti_en: false
+  point_filter_num: 1
+  filter_size_surf: 0.1 # 0.2
+  lidar_type: 7 # Robosense
+  scan_line: 32
+  blind: 0.6 # 0.1 0.3
+ 
+vio:
+  # One fixed photometric anchor; only the current filter state is updated.
+  reference_max_age: 8
+  visual_voxel_size: 0.5 # independent visual-feature grid, meters
+  max_iterations: 5
+  outlier_threshold: 500
+  img_point_cov: 1000
+  patch_size: 8
+  patch_pyrimid_level: 4
+  normal_en: true
+  raycast_en: false
+  inverse_composition_en: false
+  exposure_estimate_en: true
+  inv_expo_cov: 0.1
+
+imu:
+  imu_en: true
+  imu_int_frame: 30
+  acc_cov: 0.5 # 0.1
+  gyr_cov: 0.01
+  b_acc_cov: 0.0001 # 0.1
+  b_gyr_cov: 0.0001 # 0.1
+
+lio:
+  max_iterations: 5
+  dept_err: 0.02
+  beam_err: 0.05
+  variance_floor: 0.001 # measurement variance floor, m^2
+  min_eigen_value: 0.0001 # normalized plane scatter, m^2
+
+map:
+  resolution: 0.4 # block edge in metres; subvoxel edge is half this
+  capacity: 100000000 # most recently inserted/touched blocks retained
+
+
+uav:
+  imu_rate_odom: false
+  gravity_align_en: false
+
+publish:
+  dense_map_en: true
+  pub_effect_point_en: false 
+  pub_plane_en: false
+  pub_scan_num: 1
+  blind_rgb_points: 0.0
+
+evo:
+  seq_name: "hilti23_robot"
+  pose_output_en: true
+
+pcd_save:
+  pcd_save_en: true
+  type: 0 # 0: World Frame, 1: Body Frame;
+  colmap_output_en: false # need to set interval = -1
+  filter_size_pcd: 0.15
+  interval: -1
+  # how many LiDAR frames saved in each pcd file;
+  # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
+
+image_save:
+  img_save_en: false
+  interval: 1

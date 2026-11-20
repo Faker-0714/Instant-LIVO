@@ -1,0 +1,16 @@
+# Collection 1, /alphasense_driver_ros/cam0 (front-right camera).
+# Source: collection_1_newer_college/cam_calibration/cam0-1/
+# _2021-07-01-13-36-53-cam0-1-camchain-imucam.yaml, cam0.
+# Kalibr pinhole + equidistant maps to Vikit EquidistantCamera with k1..k4.
+cam_model: EquidistantCamera
+cam_width: 720
+cam_height: 540
+scale: 1.0
+cam_fx: 352.779
+cam_fy: 354.609
+cam_cx: 359.035
+cam_cy: 260.546
+k1: -0.04217
+k2: -0.00413
+k3: 0.00179
+k4: -0.00063

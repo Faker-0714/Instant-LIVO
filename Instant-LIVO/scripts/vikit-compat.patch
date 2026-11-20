@@ -1,0 +1,67 @@
+diff --git a/vikit_common/CMakeLists.txt b/vikit_common/CMakeLists.txt
+--- a/vikit_common/CMakeLists.txt
++++ b/vikit_common/CMakeLists.txt
+@@ -8,6 +8,10 @@
+ 
+ # Set build flags. Set IS_ARM on odroid board as environment variable
+ SET(CMAKE_CXX_FLAGS "-Wall -D_LINUX -D_REENTRANT -march=native -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unknown-pragmas")
++ADD_DEFINITIONS(-DEIGEN_MAX_ALIGN_BYTES=16 -DEIGEN_MAX_STATIC_ALIGN_BYTES=16)
++IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
++  STRING(REPLACE "-march=native" "-march=x86-64 -mtune=native" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
++ENDIF()
+ # IF(DEFINED ENV{ARM_ARCHITECTURE})
+ #   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon -march=armv8-a")
+ # ELSE()
+diff --git a/vikit_ros/CMakeLists.txt b/vikit_ros/CMakeLists.txt
+--- a/vikit_ros/CMakeLists.txt
++++ b/vikit_ros/CMakeLists.txt
+@@ -6,6 +6,10 @@
+ 
+ # Set build flags
+ SET(CMAKE_CXX_FLAGS "-Wall -D_LINUX -D_REENTRANT -march=native -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unknown-pragmas")
++ADD_DEFINITIONS(-DEIGEN_MAX_ALIGN_BYTES=16 -DEIGEN_MAX_STATIC_ALIGN_BYTES=16)
++IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$")
++  STRING(REPLACE "-march=native" "-march=x86-64 -mtune=native" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
++ENDIF()
+ SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g")
+ IF(CMAKE_COMPILER_IS_GNUCC)
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+diff --git a/vikit_common/include/vikit/equidistant_camera.h b/vikit_common/include/vikit/equidistant_camera.h
+--- a/vikit_common/include/vikit/equidistant_camera.h
++++ b/vikit_common/include/vikit/equidistant_camera.h
+@@ -120,6 +120,14 @@
+     jac(1,0) = 0.0;
+     jac(1,1) = fy_ * z_inv;
+     jac(1,2) = -fy_ * y * z_inv_2;
++    if (distortion_)
++    {
++      jac.row(0) /= fx_;
++      jac.row(1) /= fy_;
++      jac = (jacobian_2x2(p.head<2>() * z_inv) * jac).eval();
++      jac.row(0) *= fx_;
++      jac.row(1) *= fy_;
++    }
+     return jac;
+   }
+ 
+diff --git a/vikit_common/src/equidistant_camera.cpp b/vikit_common/src/equidistant_camera.cpp
+--- a/vikit_common/src/equidistant_camera.cpp
++++ b/vikit_common/src/equidistant_camera.cpp
+@@ -58,7 +58,7 @@
+       theta = thetad /
+               (1.0 + k1_ * theta2 + k2_ * theta4 + k3_ * theta6 + k4_ * theta8);
+     }
+-    const double scaling = std::tan(theta) / thetad;
++    const double scaling = thetad < 1e-8 ? 1.0 : std::tan(theta) / thetad;
+     x *= scaling;
+     y *= scaling;
+     xyz[0] = x;
+@@ -95,7 +95,7 @@
+     const double r = uv.norm();
+     if (r < 1e-8)
+     {
+-      return uv;
++      return Vector2d(fx_*uv[0] + cx_, fy_*uv[1] + cy_);
+     }
+     const double theta = std::atan(r);
+     const double thetad = thetad_from_theta(theta);

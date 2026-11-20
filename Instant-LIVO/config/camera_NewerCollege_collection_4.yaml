@@ -1,0 +1,16 @@
+# Collection 4, /alphasense_driver_ros/cam0 (front-right camera).
+# Calibration is absent from the local dataset; source: cam_0 in
+# /home/a1/Omni-LIVO/src/Omni-LIVO/Omni-LIVO/config/NCD4_cam.yaml.
+# Pair with NewerCollege_collection_4.yaml; collection 1 has different calibration.
+cam_model: EquidistantCamera
+cam_width: 720
+cam_height: 540
+scale: 1.0
+cam_fx: 353.83531
+cam_fy: 353.08085
+cam_cx: 354.96036
+cam_cy: 261.96624
+k1: -0.03909
+k2: -0.00836
+k3: 0.00687
+k4: -0.00223

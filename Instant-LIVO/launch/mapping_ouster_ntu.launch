@@ -1,0 +1,18 @@
+<launch>
+
+	<arg name="rviz" default="true" />
+  <arg name="bag_enable" default="" doc="Empty keeps common/bag_enable from YAML." />
+  <arg name="bag_path" default="" doc="Empty keeps common/bag_path from YAML." />
+
+	<rosparam command="load" file="$(find instant_livo)/config/NTU_VIRAL.yaml" />
+  <param name="common/bag_enable" type="bool" value="$(arg bag_enable)" if="$(eval arg('bag_enable') != '')" />
+  <param name="common/bag_path" type="str" value="$(arg bag_path)" if="$(eval arg('bag_path') != '')" />
+
+	<node pkg="instant_livo" type="instant_livo_mapping" name="laserMapping" output="screen">
+		<rosparam file="$(find instant_livo)/config/camera_NTU_VIRAL.yaml" />
+	</node>
+	
+	<group if="$(arg rviz)">
+		<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find instant_livo)/rviz_cfg/ntu_viral.rviz" />
+	</group>
+</launch> 	

@@ -1,0 +1,102 @@
+# Newer College collection_1_newer_college, Alphasense cam0.
+# Pair with camera_NewerCollege_collection_1.yaml.
+common:
+  bag_enable: false # true: read bag directly; false: subscribe to ROS topics
+  bag_path: "" # bag file path used when bag_enable is true
+  img_topic: "/alphasense_driver_ros/cam0"
+  lid_topic: "/os_cloud_node/points"
+  imu_topic: "/alphasense_driver_ros/imu"
+  img_en: 1
+  lidar_en: 1
+  ros_driver_bug_fix: false
+
+extrin_calib:
+  # os_sensor -> Alphasense IMU, from the local Omni-LIVO/config/NCD1.yaml.
+  # p_imu = extrinsic_R * p_lidar + extrinsic_T (translation in meters).
+  extrinsic_T: [-0.037, -0.008, -0.026]
+  extrinsic_R: [1, 0, 0,
+                0, -1, 0,
+                0, 0, -1]
+  # T_cam_lidar = T_cam_imu * T_imu_lidar, using collection_1 cam0 Kalibr
+  # _2021-07-01-13-36-53-cam0-1-camchain-imucam.yaml in cam_calibration/cam0-1.
+  Rcl: [0.0034391550757878753, -0.9999759880188567, 0.00601627775923208,
+        -0.001005447410825977, -0.006019768145553855, -0.9999813755600542,
+        0.9999935806233302, 0.00343304197255484, -0.0010261261842145486]
+  Pcl: [-0.05543205126790926, -0.016845943149958, -0.08604853069045817]
+
+time_offset:
+  lidar_time_offset: 0.0 # Ouster header is scan start; point field t is in ns.
+  imu_time_offset: 0.0
+  img_time_offset: 0.0018008003299918548 # Kalibr: t_imu = t_cam + shift.
+  exposure_time_init: 0.0
+
+preprocess:
+  hilti_en: false # Alphasense images are 30 Hz; disable HILTI frame skipping.
+  point_filter_num: 1
+  filter_size_surf: 0.1 # 0.2
+  lidar_type: 3 # Ouster OS0-128
+  scan_line: 128
+  blind: 0.2
+ 
+vio:
+  # One fixed photometric anchor; only the current filter state is updated.
+  reference_max_age: 8
+  visual_voxel_size: 0.5 # independent visual-feature grid, meters
+  max_iterations: 5
+  outlier_threshold: 500
+  img_point_cov: 1000
+  patch_size: 8
+  patch_pyrimid_level: 4
+  normal_en: true
+  raycast_en: false
+  inverse_composition_en: false
+  exposure_estimate_en: true
+  inv_expo_cov: 0.1
+
+imu:
+  imu_en: true
+  imu_int_frame: 30
+  acc_cov: 0.5 # 0.1
+  gyr_cov: 0.01
+  b_acc_cov: 0.0001 # 0.1
+  b_gyr_cov: 0.0001 # 0.1
+
+lio:
+  max_iterations: 5
+  dept_err: 0.02
+  beam_err: 0.05
+  variance_floor: 0.001 # measurement variance floor, m^2
+  min_eigen_value: 0.0001 # normalized plane scatter, m^2
+
+map:
+  resolution: 0.4 # block edge in metres; subvoxel edge is half this
+  capacity: 100000000 # most recently inserted/touched blocks retained
+
+
+uav:
+  imu_rate_odom: false
+  gravity_align_en: false
+
+publish:
+  dense_map_en: true
+  pub_effect_point_en: false 
+  pub_plane_en: false
+  pub_scan_num: 1
+  blind_rgb_points: 0.0
+
+evo:
+  seq_name: "NewerCollege_collection_1"
+  pose_output_en: true
+
+pcd_save:
+  pcd_save_en: true
+  type: 0 # 0: World Frame, 1: Body Frame;
+  colmap_output_en: false # need to set interval = -1
+  filter_size_pcd: 0.15
+  interval: -1
+  # how many LiDAR frames saved in each pcd file;
+  # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
+
+image_save:
+  img_save_en: false
+  interval: 1
