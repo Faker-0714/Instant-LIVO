@@ -4,6 +4,8 @@
 
 This repository contains the implementation of **Instant-LIVO**, a tightly-coupled LiDAR-Inertial-Visual Odometry system based on [FAST-LIVO2](https://github.com/hku-mars/FAST-LIVO2).
 
+Our paper is available on [arXiv](https://arxiv.org/abs/2611.27633).
+
 ## Abstract
 
 LiDAR–Inertial–Visual Odometry (LIVO) is a fundamental technology for autonomous systems; however, deployment on resource-constrained platforms remains challenging due to physical limitations. This paper presents Instant-LIVO, a tightly coupled, high-speed, real-time LIVO system. The system introduces a compact geometric map based on spatial-hashed OctVox and accelerates local-neighborhood retrieval and plane fitting through cache-assisted heuristic staged K-nearest-neighbor searches. It also employs a bounded single-reference-frame visual map that adaptively updates the reference frame according to the tracking status, while using Schmidt-type uncertainty-aware photometric fusion to maintain the correlation between the reference pose and the current state. The system performs multisensor fusion through a sequential process consisting of IMU prediction, LiDAR geometric correction, and visual photometric correction. It was evaluated on 32 public benchmarks and custom datasets. While maintaining competitive accuracy on both x86 and ARM platforms, Instant-LIVO achieves average processing-speed improvements of approximately 2.3× and 2.1×, respectively, and reduces peak memory usage to approximately 1/20 and 1/13, respectively. The results demonstrate that the proposed method outperforms existing LIO and LIVO baselines in both accuracy and computational efficiency.
